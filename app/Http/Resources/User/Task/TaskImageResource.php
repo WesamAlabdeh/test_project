@@ -16,7 +16,7 @@ class TaskImageResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'image' => $this->image ? url('/') . '/storage' . substr($this->image, 6) : null,
+            'image' => $this->image ? asset('storage/' . $this->image) : null,
         ];
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\TaskStatusEnum;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Task extends BaseModel
 {
@@ -22,7 +23,13 @@ class Task extends BaseModel
 
     protected static function booted()
     {
-        static::deleting(function (Task $task) {});
+        static::deleting(function (Task $task) {
+            foreach ($task->images as $image) {
+                if ($image->path) {
+                    Storage::disk('public')->delete($image->path);
+                }
+            }
+        });
 
         static::updating(function (Task $task) {});
     }
