@@ -1,13 +1,13 @@
 <?php
 
 use App\Exceptions\ApiException;
+use App\Http\Middleware\AbilityMiddleware;
 use App\Utils\Logger;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -19,7 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {})
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'ability' => AbilityMiddleware::class,
+        ]);
+    })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (\Exception $exception, Request $request) {
             Logger::LogException($exception);

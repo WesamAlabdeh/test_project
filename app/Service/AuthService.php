@@ -16,12 +16,13 @@ class AuthService
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             Errors::InvalidCredentials('Incorrect Password', 'incorrect Password');
         }
-
+        $abilities = $user->abilities->pluck('name')->toArray();
         $token = $user->createToken('token')->plainTextToken;
 
         $response = [
             'user' => $user,
             'token' => $token,
+            'abilities' => $abilities,
         ];
 
         return $response;
