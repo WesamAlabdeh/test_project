@@ -19,6 +19,15 @@ class Task extends BaseModel
         'status' => 'equal',
     ];
 
+
+    protected static function booted()
+    {
+        static::deleting(function (Task $task) {});
+
+        static::updating(function (Task $task) {});
+    }
+
+
     //@relations 
     public function user(): BelongsTo
     {
