@@ -24,7 +24,7 @@ class UpdateUserRequest extends FormRequest
         return [
             'username' => 'sometimes|string|max:255',
             'phone' => 'sometimes|regex:/^09[0-9]{8}$/|min:10|max:10',
-            'email' => 'sometimes|email|unique:users,email',
+            'email' => 'sometimes|email',
         ];
     }
 }

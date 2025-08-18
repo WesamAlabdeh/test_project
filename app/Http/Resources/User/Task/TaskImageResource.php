@@ -15,6 +15,7 @@ class TaskImageResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'image' => $this->image ? url('/') . '/storage' . substr($this->image, 6) : null,
         ];
     }
