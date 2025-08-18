@@ -23,8 +23,8 @@ Route::prefix('dashboard')->middleware(['auth:sanctum'])->group(function () {
 
     Route::prefix('task')->controller(TaskController::class)->group(function () {
         Route::post('/', 'store')->middleware('ability:task::store');
-        Route::put('/{id}', 'update')->middleware('ability:task::update');
-        Route::delete('/{id}', 'delete')->middleware('ability:task::delete');
+        Route::put('/{id}', 'update')->middleware(['ability:task::update', 'task.owner']);
+        Route::delete('/{id}', 'delete')->middleware(['ability:task::delete', 'task.owner']);
     });
     Route::prefix('user')->controller(UserController::class)->group(function () {
         Route::get('/', 'index')->middleware('ability:user::index');
