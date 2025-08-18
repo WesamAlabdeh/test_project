@@ -15,6 +15,8 @@ class Task extends BaseModel
     protected  static $filtersArray = [
         'title' => 'like',
         'description' => 'like',
+        'user_id' => 'equal',
+        'status' => 'equal',
     ];
 
     //@relations 

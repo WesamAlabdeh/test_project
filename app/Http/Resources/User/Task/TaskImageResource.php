@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Http\Resources\User\Task;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class TaskImageResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'image' => $this->image ? url('/') . '/storage' . substr($this->image, 6) : null,
+        ];
+    }
+}
