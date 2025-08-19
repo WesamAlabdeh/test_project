@@ -38,7 +38,7 @@ class TaskService extends BaseService
 
             $updatableData = collect($data)->except(['images', 'delete_image_ids', 'user_id'])->toArray();
             $originalTask = Task::findOrFail($id);
-            $oldStatus = (string) $originalTask->status;
+            $oldStatus = $originalTask->getRawOriginal('status');
 
             $task = parent::update($id, $updatableData);
 
@@ -51,7 +51,7 @@ class TaskService extends BaseService
             }
 
             if (array_key_exists('status', $updatableData)) {
-                $newStatus = (string) $task->status;
+                $newStatus = $task->getRawOriginal('status');
                 if ($newStatus !== $oldStatus) {
                     event(new TaskStatusUpdated($task, $oldStatus, $newStatus));
                 }
