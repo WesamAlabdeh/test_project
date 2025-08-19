@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Events\TaskStatusUpdated;
 use App\Models\Task;
 use App\Models\TaskImage;
 use Illuminate\Support\Facades\Auth;
@@ -36,6 +37,8 @@ class TaskService extends BaseService
             $this->assignAuthenticatedUserId($data);
 
             $updatableData = collect($data)->except(['images', 'delete_image_ids', 'user_id'])->toArray();
+            $originalTask = Task::findOrFail($id);
+            $oldStatus = (string) $originalTask->status;
 
             $task = parent::update($id, $updatableData);
 
@@ -45,6 +48,13 @@ class TaskService extends BaseService
 
             if (!empty($data['images']) && is_array($data['images'])) {
                 $this->attachImages($task, $data['images']);
+            }
+
+            if (array_key_exists('status', $updatableData)) {
+                $newStatus = (string) $task->status;
+                if ($newStatus !== $oldStatus) {
+                    event(new TaskStatusUpdated($task, $oldStatus, $newStatus));
+                }
             }
 
             return true;

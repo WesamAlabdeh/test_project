@@ -1,61 +1,181 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## Test Project (Laravel API)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This repository contains a Laravel-based API with user, task, roles/abilities, jobs, mail, and Octane (RoadRunner) support.
 
-## About Laravel
+## Setup & Installation
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Run the following from the project root:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```bash
+# 1) Install PHP dependencies
+composer install
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+# 2) Create your environment file
+# If the repo includes .env.save (preferred by this project):
+cp .env.save .env
+# If not available, fall back to Laravel's default:
+# cp .env.example .env
 
-## Learning Laravel
+# 3) Generate application key
+php artisan key:generate
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+# 4) Configure your DB/queue/mail in .env (example)
+# open .env and set values like:
+# APP_NAME="Test Project"
+# APP_ENV=local
+# APP_DEBUG=true
+# APP_URL=http://127.0.0.1:8000
+#
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=test_project
+# DB_USERNAME=root
+# DB_PASSWORD=secret
+#
+# QUEUE_CONNECTION=database   # or redis
+# CACHE_DRIVER=file           # or redis
+# SESSION_DRIVER=file
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+# 5) Create storage symlink for public files
+php artisan storage:link
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# 6) Run migrations and seeders
+php artisan migrate --seed
+```
 
-## Laravel Sponsors
+## Running the Application
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Queue worker
 
-### Premium Partners
+```bash
+# Process queued jobs (run in a dedicated terminal)
+php artisan queue:work --tries=3 --backoff=5
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# Or as a daemon with sleep and memory limits
+# php artisan queue:work --sleep=1 --memory=256 --timeout=120
+```
 
-## Contributing
+### Task scheduler (to run scheduled jobs/commands)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+# Dev (keeps scheduler running in foreground)
+php artisan schedule:work
 
-## Code of Conduct
+# One-off run (executes due tasks once and exits)
+php artisan schedule:run
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Production cron (runs every minute)
+# * * * * * cd /path/to/test_project && php artisan schedule:run >> /dev/null 2>&1
+```
 
-## Security Vulnerabilities
+### Real-Time Notifications (Pusher + Broadcasting)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+# 1) Install dependencies (server + frontend)
+composer require pusher/pusher-php-server
+npm i -D laravel-echo pusher-js
 
-## License
+# 2) Configure .env (example)
+echo "BROADCAST_DRIVER=pusher" >> .env
+echo "PUSHER_APP_ID=your_id" >> .env
+echo "PUSHER_APP_KEY=your_key" >> .env
+echo "PUSHER_APP_SECRET=your_secret" >> .env
+echo "PUSHER_APP_CLUSTER=mt1" >> .env
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# 3) Frontend env for Vite (optional if using custom host/port)
+echo "VITE_PUSHER_APP_KEY=your_key" >> .env
+echo "VITE_PUSHER_APP_CLUSTER=mt1" >> .env
+echo "VITE_PUSHER_HOST=127.0.0.1" >> .env
+echo "VITE_PUSHER_PORT=6001" >> .env
+echo "VITE_PUSHER_SCHEME=http" >> .env
+
+# 4) Build assets
+npm run dev
+```
+
+This project broadcasts `TaskStatusUpdated` on private channel `users.{userId}` when a task status actually changes. Authenticate via Sanctum to authorize the private channel.
+
+### Serve with Octane (RoadRunner)
+
+Make sure Octane and RoadRunner are available (this project already includes Octane). To start the server:
+
+```bash
+# Bind to all interfaces on port 8000
+php artisan octane:start --server=roadrunner --workers=4 --max-requests=500 --host=0.0.0.0 --port=8000
+
+# Alternatively, use your LAN IP as host (macOS)
+HOST=$(ipconfig getifaddr en0 || ipconfig getifaddr en1 || echo 127.0.0.1)
+php artisan octane:start --server=roadrunner --workers=4 --max-requests=500 --host=$HOST --port=8000
+
+# Check Octane status
+php artisan octane:status
+```
+
+Then open your browser at the host/port shown. If you used the LAN IP, set `APP_URL` in `.env` accordingly, e.g. `APP_URL=http://$HOST:8000`.
+
+## Testing
+
+```bash
+# Run the test suite
+php artisan test
+# or
+./vendor/bin/phpunit
+```
+
+## Common Commands (Quick Reference)
+
+```bash
+# Install dependencies
+composer install
+
+# Environment
+cp .env.save .env        # or: cp .env.example .env
+php artisan key:generate
+
+# Database
+php artisan migrate --seed
+# (optional) reset & reseed
+# php artisan migrate:fresh --seed
+
+# Storage symlink
+php artisan storage:link
+
+# Queue & schedule
+php artisan queue:work
+php artisan schedule:work    # or: php artisan schedule:run
+
+# Serve (Octane, RoadRunner)
+php artisan octane:start --server=roadrunner --workers=4 --max-requests=500 --host=0.0.0.0 --port=8000
+php artisan octane:status
+
+# Tests
+php artisan test
+```
+
+## Project Structure (Brief)
+
+-   **`app/Console/Commands`**: Custom Artisan commands (e.g., daily task sender).
+-   **`app/Enums`**: Enumerations like `TaskStatusEnum`.
+-   **`app/Exceptions`**: API exception handling and error definitions.
+-   **`app/Http/Controllers`**: API controllers for Admin/Auth/User domains.
+-   **`app/Http/Middleware`**: HTTP middleware (abilities, ownership checks).
+-   **`app/Http/Requests`**: Form request validation for Admin/User/Task endpoints.
+-   **`app/Http/Resources`**: API resource transformers for responses.
+-   **`app/Jobs`**: Queued jobs (e.g., `SendDailyUserTaskJob`).
+-   **`app/Mail`**: Mailable classes (e.g., `SendDailyUserTaskMail`).
+-   **`app/Models`**: Eloquent models (`User`, `Task`, `Role`, `Ability`, etc.).
+-   **`app/Providers`**: Service providers (`AppServiceProvider`).
+-   **`app/Service`**: Application service layer (`AuthService`, `TaskService`, `UserService`).
+-   **`app/Traits`**: Reusable traits (filters, file uploads).
+-   **`app/Utils`**: Helpers/utilities (e.g., `Logger`).
+-   **`config/`**: Framework and package configuration.
+-   **`database/migrations`**: Schema definitions; **`database/seeders`**: seed data.
+-   **`routes/`**: Route definitions (`api.php`, `web.php`, `console.php`).
+-   **`resources/views`**: Blade templates (emails, welcome page).
+-   **`tests/`**: Feature and unit tests.
+
+## Notes
+
+-   Ensure your queue driver in `.env` matches your environment (`database` or `redis`). For `database`, run `php artisan queue:table && php artisan migrate` once to create the jobs table (this repo already includes a jobs migration).
+-   If you change `.env`, restart running workers/servers so changes take effect (stop and re-run `queue:work`, `octane:start`).

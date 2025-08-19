@@ -18,7 +18,9 @@ class TaskResource extends JsonResource
             'id'=>$this->id,
             'user' => $this->user->username,
             'title' => $this->title,
-            'status' => $this->status
+            'status' => $this->status,
+            'description' => $this->description,
+            'images' => TaskImageResource::collection($this->whenLoaded('images')),
         ];
     }
 }

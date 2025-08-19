@@ -17,7 +17,7 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $filters = $request->all();
-        $tasks = $this->taskService->index($filters, ['user']);
+        $tasks = $this->taskService->index($filters, ['user','images']);
         return $this->success(TaskResource::collection($tasks));
     }
     public function show($id)
